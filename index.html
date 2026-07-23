@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Vân music</title>
+    <!-- Google Fonts: Outfit for cute modern look, Playfair Display for headers -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 1. Cinematic Intro -->
+    <div id="intro-overlay" class="intro-overlay">
+
+        <!-- Start Screen (shown first) -->
+        <div class="start-screen" id="start-screen">
+            <p class="start-tagline">✦ Thanh Vân music ✦</p>
+            <button id="start-btn" class="start-btn hidden">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="margin-right:8px;">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <span>Bắt đầu hành trình</span>
+            </button>
+        </div>
+
+        <!-- Video cinematic layer -->
+        <video id="intro-video" class="intro-video" playsinline preload="auto">
+            <source src="assets/vdieo.mp4" type="video/mp4">
+        </video>
+
+        <!-- Fade-to-black transition layer -->
+        <div class="fade-black" id="fade-black"></div>
+
+    </div>
+
+    <!-- 2. Main Ambient World Scene -->
+    <div class="main-scene" id="main-scene">
+        <!-- Deep Sky Background -->
+        <div class="sky-background"></div>
+        
+        <!-- Sun Rays Effect -->
+        <div class="sun-rays"></div>
+
+        <!-- Canvas for interactive music notes, sparkles, and petals -->
+        <canvas id="particles-canvas" class="particles-canvas"></canvas>
+
+        <!-- Chibi Character Stage -->
+        <div class="character-stage" id="character-stage">
+            <!-- Chibi Girl Layer -->
+            <div class="chibi-container" id="chibi-container">
+                <img src="assets/chibi.png" alt="Chibi Guitar Girl" class="chibi-image" id="chibi-girl">
+                <!-- Floating microphone -->
+                <div class="mic-stand">
+                    <svg viewBox="0 0 24 24" width="24" height="24" class="mic-icon">
+                        <rect x="9" y="2" width="6" height="10" rx="3" fill="#ffffff" stroke="#d5a6bd" stroke-width="1.5" />
+                        <path d="M5 9c0 4 3.5 6 7 6s7-2 7-6" fill="none" stroke="#d5a6bd" stroke-width="1.5" stroke-linecap="round" />
+                        <line x1="12" y1="15" x2="12" y2="21" stroke="#d5a6bd" stroke-width="1.5" stroke-linecap="round" />
+                        <line x1="8" y1="21" x2="16" y2="21" stroke="#d5a6bd" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Lyric bubbles: sibling of chibi-container so they DON'T
+                 inherit the character's float / sway animation -->
+            <div class="lyric-bubble-layer" id="lyric-bubble-layer"></div>
+        </div>
+    </div>
+
+    <!-- 3. Glassmorphism Music Player Interface -->
+    <div class="player-wrapper" id="player-wrapper">
+        <div class="player-container">
+            <!-- Visual Track Info -->
+            <div class="track-info">
+                <div class="album-art-container">
+                    <img src="assets/chibi.png" alt="Track Art" class="album-art" id="player-art">
+                    <div class="music-glow-ring"></div>
+                </div>
+                <div class="track-details">
+                    <h2 class="track-title" id="current-title">Nắng trên mây</h2>
+                    <p class="track-artist" id="current-artist">Cloud Girl</p>
+                </div>
+            </div>
+
+            <!-- Central Controls -->
+            <div class="player-controls-center">
+                <div class="controls-buttons">
+                    <button class="control-btn" id="shuffle-btn" title="Phát ngẫu nhiên">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.45 20 9.5V4h-5.5zm.38 9.44l-1.41 1.41 3.56 3.56L15 20h6v-6l-2.04 2.04-4.08-4.04z"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="control-btn" id="prev-btn" title="Bài trước">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="control-btn play-btn" id="play-btn" title="Phát / Tạm dừng">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" id="play-icon">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="control-btn" id="next-btn" title="Bài tiếp theo">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="control-btn" id="repeat-btn" title="Lặp lại">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="progress-container">
+                    <span class="time-label" id="current-time">00:00</span>
+                    <div class="progress-bar-bg" id="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                        <div class="progress-handle" id="progress-handle"></div>
+                    </div>
+                    <span class="time-label" id="total-duration">03:45</span>
+                </div>
+            </div>
+
+            <!-- Right Controls: Volume & Playlist Toggle -->
+            <div class="player-controls-right">
+                <div class="volume-container">
+                    <button class="control-btn" id="volume-btn" title="Mute/Unmute">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" id="volume-icon">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    </button>
+                    <div class="volume-slider-bg" id="volume-slider-bg">
+                        <div class="volume-slider-fill" id="volume-slider-fill" style="width: 70%;"></div>
+                    </div>
+                </div>
+
+                <button class="playlist-toggle-btn" id="playlist-toggle-btn" title="Danh sách phát">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-right: 6px;">
+                        <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v6l5-3z"/>
+                    </svg>
+                    <span>Danh sách phát</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide-up Playlist Panel -->
+        <div class="playlist-panel" id="playlist-panel">
+            <div class="playlist-header">
+                <h3>Danh sách phát</h3>
+                <button class="close-playlist-btn" id="close-playlist-btn">&times;</button>
+            </div>
+            <ul class="song-list" id="song-list">
+                <!-- Dynamically generated list items -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Background Audio Element -->
+    <audio id="main-audio"></audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
