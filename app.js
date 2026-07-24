@@ -792,6 +792,7 @@ audio.addEventListener("timeupdate", updateLyricSync);
 startBtn.addEventListener("click", startCinematicIntro);
 
 let videoFadeTriggered = false;
+let maxIntroTimer = null;
 
 function checkVideoTimeForFade() {
     if (videoFadeTriggered || isNaN(introVideo.duration) || introVideo.duration === 0) return;
@@ -799,8 +800,6 @@ function checkVideoTimeForFade() {
     // Trigger fade-to-black 1.0 second before video ends
     const timeRemaining = introVideo.duration - introVideo.currentTime;
     if (timeRemaining <= 1.0) {
-        videoFadeTriggered = true;
-        introVideo.removeEventListener("timeupdate", checkVideoTimeForFade);
         endVideoWithFade();
     }
 }
@@ -811,8 +810,10 @@ function startCinematicIntro() {
     startBtn.classList.add("hidden");
     
     // Enable sound for the intro video
-    introVideo.muted = false;
-    introVideo.volume = 1.0;
+    try {
+        introVideo.muted = false;
+        introVideo.volume = 1.0;
+    } catch(e) {}
     
     // Fade out start screen text/white layer, reveal the video layer
     startScreen.classList.add("fade-out");
@@ -830,64 +831,62 @@ function startCinematicIntro() {
     // Play video
     introVideo.play().catch(err => {
         console.log("Video play interrupted or blocked: ", err);
-        // Fallback if video fails to play
         endVideoWithFade();
     });
     
-    // Fallback if ended event triggers first
+    // Fallback if ended event triggers
     introVideo.onended = () => {
-        if (!videoFadeTriggered) {
-            endVideoWithFade();
-        }
+        endVideoWithFade();
     };
+
+    // Safety fallback: if video stalls or fails on mobile, force transition after 12 seconds
+    if (maxIntroTimer) clearTimeout(maxIntroTimer);
+    maxIntroTimer = setTimeout(() => {
+        endVideoWithFade();
+    }, 12000);
 }
 
 function endVideoWithFade() {
+    if (videoFadeTriggered) return;
     videoFadeTriggered = true;
+    
+    if (maxIntroTimer) clearTimeout(maxIntroTimer);
     introVideo.removeEventListener("timeupdate", checkVideoTimeForFade);
     
-    // Fade out video audio smoothly over 800ms while screen fades to black
+    // Fade out video audio smoothly over 500ms while screen fades to black
     const fadeAudioInterval = setInterval(() => {
-        if (introVideo.volume > 0.05) {
-            introVideo.volume = Math.max(0, introVideo.volume - 0.08);
-        } else {
-            introVideo.volume = 0;
+        try {
+            if (introVideo.volume > 0.1) {
+                introVideo.volume -= 0.1;
+            } else {
+                introVideo.volume = 0;
+                clearInterval(fadeAudioInterval);
+            }
+        } catch(e) {
             clearInterval(fadeAudioInterval);
         }
-    }, 50);
+    }, 40);
 
-    // Step 1: Tối dần màn hình (Fade to black over 800ms while video is still running underneath)
+    // Step 1: Fade screen to black over 600ms
     fadeBlack.classList.add("active");
     
-    // Step 2: Đợi màn hình tối ĐEN HOÀN TOÀN (800ms) mới xử lý phần bên dưới
+    // Step 2: Once screen is black (600ms later), reveal main scene and hide intro overlay completely
     setTimeout(() => {
-        // Tạm dừng và ẨN HOÀN TOÀN video ngay lúc màn hình đang đen xì (Tránh bị nháy khung hình cuối video)
-        introVideo.pause();
-        introVideo.style.display = "none";
-        startScreen.style.display = "none";
+        try {
+            introVideo.pause();
+        } catch(e) {}
         
-        // Kích hoạt giao diện chính (Mây & Nhân vật) phía sau
+        // Activate main scene and player wrapper
         mainScene.classList.add("active");
+        playerWrapper.classList.add("active");
         canvasActive = true;
         
-        // Sáng dần lên: Màn đen mờ đi từ từ để lộ ra giao diện chính bên dưới
-        fadeBlack.classList.remove("active");
+        // Hide intro overlay completely so it can never block the main UI
+        introOverlay.style.display = "none";
         
-        // Fade nhạc background từ từ vào
-        fadeInAudio(0.7, 1800);
-        
-        // Step 3: Sau khi màn đen mờ hẳn và hiện trọn vẹn giao diện chính (800ms sau)
-        setTimeout(() => {
-            // Hiện khung trình phát nhạc bên dưới
-            playerWrapper.classList.add("active");
-            
-            // Dọn dẹp hoàn toàn lớp phủ Intro để giải phóng bộ nhớ
-            introOverlay.style.display = "none";
-            introVideo.src = "";
-            introVideo.load();
-        }, 800);
-        
-    }, 800);
+        // Fade in background music volume smoothly
+        fadeInAudio(0.7, 1400);
+    }, 600);
 }
 
 // Smoothly fades in the background audio volume
