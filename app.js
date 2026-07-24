@@ -284,8 +284,10 @@ const volumeSliderBg = document.getElementById("volume-slider-bg");
 const volumeSliderFill = document.getElementById("volume-slider-fill");
 const playlistToggleBtn = document.getElementById("playlist-toggle-btn");
 const playlistPanel = document.getElementById("playlist-panel");
+const playlistBackdrop = document.getElementById("playlist-backdrop");
 const closePlaylistBtn = document.getElementById("close-playlist-btn");
 const songListContainer = document.getElementById("song-list");
+
 
 const introOverlay = document.getElementById("intro-overlay");
 const startScreen = document.getElementById("start-screen");
@@ -441,14 +443,20 @@ volumeBtn.addEventListener("click", () => {
 
 // Playlist Panel toggle behavior
 playlistToggleBtn.addEventListener("click", () => {
-    playlistPanel.classList.toggle("active");
-    playlistToggleBtn.classList.toggle("active");
+    const isActive = playlistPanel.classList.toggle("active");
+    playlistToggleBtn.classList.toggle("active", isActive);
+    if (playlistBackdrop) playlistBackdrop.classList.toggle("active", isActive);
 });
 
-closePlaylistBtn.addEventListener("click", () => {
+function closePlaylist() {
     playlistPanel.classList.remove("active");
     playlistToggleBtn.classList.remove("active");
-});
+    if (playlistBackdrop) playlistBackdrop.classList.remove("active");
+}
+
+closePlaylistBtn.addEventListener("click", closePlaylist);
+if (playlistBackdrop) playlistBackdrop.addEventListener("click", closePlaylist);
+
 
 // ==========================================================================
 // 3. Audio Core Logic Functions
@@ -1152,9 +1160,10 @@ const clickSymbols = ["♪", "♫", "♩", "✨", "🌸", "✦", "💖"];
 
 document.addEventListener("click", (e) => {
     // Ignore clicks on functional buttons, inputs, player controls, sliders, etc.
-    if (e.target.closest("button, input, a, .control-btn, .song-item, .progress-bar-bg, .volume-slider-bg, .close-playlist-btn, .start-btn, .playlist-toggle-btn")) {
+    if (e.target.closest("button, input, a, .control-btn, .song-item, .progress-bar-bg, .volume-slider-bg, .close-playlist-btn, .start-btn, .playlist-toggle-btn, .playlist-panel, .playlist-backdrop")) {
         return;
     }
+
     
     spawnClickEffect(e.clientX, e.clientY);
 });
