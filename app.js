@@ -284,10 +284,8 @@ const volumeSliderBg = document.getElementById("volume-slider-bg");
 const volumeSliderFill = document.getElementById("volume-slider-fill");
 const playlistToggleBtn = document.getElementById("playlist-toggle-btn");
 const playlistPanel = document.getElementById("playlist-panel");
-const playlistBackdrop = document.getElementById("playlist-backdrop");
 const closePlaylistBtn = document.getElementById("close-playlist-btn");
 const songListContainer = document.getElementById("song-list");
-
 
 const introOverlay = document.getElementById("intro-overlay");
 const startScreen = document.getElementById("start-screen");
@@ -443,20 +441,14 @@ volumeBtn.addEventListener("click", () => {
 
 // Playlist Panel toggle behavior
 playlistToggleBtn.addEventListener("click", () => {
-    const isActive = playlistPanel.classList.toggle("active");
-    playlistToggleBtn.classList.toggle("active", isActive);
-    if (playlistBackdrop) playlistBackdrop.classList.toggle("active", isActive);
+    playlistPanel.classList.toggle("active");
+    playlistToggleBtn.classList.toggle("active");
 });
 
-function closePlaylist() {
+closePlaylistBtn.addEventListener("click", () => {
     playlistPanel.classList.remove("active");
     playlistToggleBtn.classList.remove("active");
-    if (playlistBackdrop) playlistBackdrop.classList.remove("active");
-}
-
-closePlaylistBtn.addEventListener("click", closePlaylist);
-if (playlistBackdrop) playlistBackdrop.addEventListener("click", closePlaylist);
-
+});
 
 // ==========================================================================
 // 3. Audio Core Logic Functions
@@ -792,7 +784,6 @@ audio.addEventListener("timeupdate", updateLyricSync);
 startBtn.addEventListener("click", startCinematicIntro);
 
 let videoFadeTriggered = false;
-let maxIntroTimer = null;
 
 function checkVideoTimeForFade() {
     if (videoFadeTriggered || isNaN(introVideo.duration) || introVideo.duration === 0) return;
@@ -800,6 +791,8 @@ function checkVideoTimeForFade() {
     // Trigger fade-to-black 1.0 second before video ends
     const timeRemaining = introVideo.duration - introVideo.currentTime;
     if (timeRemaining <= 1.0) {
+        videoFadeTriggered = true;
+        introVideo.removeEventListener("timeupdate", checkVideoTimeForFade);
         endVideoWithFade();
     }
 }
@@ -810,10 +803,8 @@ function startCinematicIntro() {
     startBtn.classList.add("hidden");
     
     // Enable sound for the intro video
-    try {
-        introVideo.muted = false;
-        introVideo.volume = 1.0;
-    } catch(e) {}
+    introVideo.muted = false;
+    introVideo.volume = 1.0;
     
     // Fade out start screen text/white layer, reveal the video layer
     startScreen.classList.add("fade-out");
@@ -831,62 +822,64 @@ function startCinematicIntro() {
     // Play video
     introVideo.play().catch(err => {
         console.log("Video play interrupted or blocked: ", err);
+        // Fallback if video fails to play
         endVideoWithFade();
     });
     
-    // Fallback if ended event triggers
+    // Fallback if ended event triggers first
     introVideo.onended = () => {
-        endVideoWithFade();
+        if (!videoFadeTriggered) {
+            endVideoWithFade();
+        }
     };
-
-    // Safety fallback: if video stalls or fails on mobile, force transition after 12 seconds
-    if (maxIntroTimer) clearTimeout(maxIntroTimer);
-    maxIntroTimer = setTimeout(() => {
-        endVideoWithFade();
-    }, 12000);
 }
 
 function endVideoWithFade() {
-    if (videoFadeTriggered) return;
     videoFadeTriggered = true;
-    
-    if (maxIntroTimer) clearTimeout(maxIntroTimer);
     introVideo.removeEventListener("timeupdate", checkVideoTimeForFade);
     
-    // Fade out video audio smoothly over 500ms while screen fades to black
+    // Fade out video audio smoothly over 800ms while screen fades to black
     const fadeAudioInterval = setInterval(() => {
-        try {
-            if (introVideo.volume > 0.1) {
-                introVideo.volume -= 0.1;
-            } else {
-                introVideo.volume = 0;
-                clearInterval(fadeAudioInterval);
-            }
-        } catch(e) {
+        if (introVideo.volume > 0.05) {
+            introVideo.volume = Math.max(0, introVideo.volume - 0.08);
+        } else {
+            introVideo.volume = 0;
             clearInterval(fadeAudioInterval);
         }
-    }, 40);
+    }, 50);
 
-    // Step 1: Fade screen to black over 600ms
+    // Step 1: Tối dần màn hình (Fade to black over 800ms while video is still running underneath)
     fadeBlack.classList.add("active");
     
-    // Step 2: Once screen is black (600ms later), reveal main scene and hide intro overlay completely
+    // Step 2: Đợi màn hình tối ĐEN HOÀN TOÀN (800ms) mới xử lý phần bên dưới
     setTimeout(() => {
-        try {
-            introVideo.pause();
-        } catch(e) {}
+        // Tạm dừng và ẨN HOÀN TOÀN video ngay lúc màn hình đang đen xì (Tránh bị nháy khung hình cuối video)
+        introVideo.pause();
+        introVideo.style.display = "none";
+        startScreen.style.display = "none";
         
-        // Activate main scene and player wrapper
+        // Kích hoạt giao diện chính (Mây & Nhân vật) phía sau
         mainScene.classList.add("active");
-        playerWrapper.classList.add("active");
         canvasActive = true;
         
-        // Hide intro overlay completely so it can never block the main UI
-        introOverlay.style.display = "none";
+        // Sáng dần lên: Màn đen mờ đi từ từ để lộ ra giao diện chính bên dưới
+        fadeBlack.classList.remove("active");
         
-        // Fade in background music volume smoothly
-        fadeInAudio(0.7, 1400);
-    }, 600);
+        // Fade nhạc background từ từ vào
+        fadeInAudio(0.7, 1800);
+        
+        // Step 3: Sau khi màn đen mờ hẳn và hiện trọn vẹn giao diện chính (800ms sau)
+        setTimeout(() => {
+            // Hiện khung trình phát nhạc bên dưới
+            playerWrapper.classList.add("active");
+            
+            // Dọn dẹp hoàn toàn lớp phủ Intro để giải phóng bộ nhớ
+            introOverlay.style.display = "none";
+            introVideo.src = "";
+            introVideo.load();
+        }, 800);
+        
+    }, 800);
 }
 
 // Smoothly fades in the background audio volume
@@ -1159,10 +1152,9 @@ const clickSymbols = ["♪", "♫", "♩", "✨", "🌸", "✦", "💖"];
 
 document.addEventListener("click", (e) => {
     // Ignore clicks on functional buttons, inputs, player controls, sliders, etc.
-    if (e.target.closest("button, input, a, .control-btn, .song-item, .progress-bar-bg, .volume-slider-bg, .close-playlist-btn, .start-btn, .playlist-toggle-btn, .playlist-panel, .playlist-backdrop")) {
+    if (e.target.closest("button, input, a, .control-btn, .song-item, .progress-bar-bg, .volume-slider-bg, .close-playlist-btn, .start-btn, .playlist-toggle-btn")) {
         return;
     }
-
     
     spawnClickEffect(e.clientX, e.clientY);
 });

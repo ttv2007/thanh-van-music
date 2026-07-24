@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- 1. Cinematic Intro -->
@@ -40,18 +40,21 @@
         <!-- Deep Sky Background -->
         <div class="sky-background"></div>
         
+        <!-- Sun Rays Effect -->
+        <div class="sun-rays"></div>
+
+        <!-- Canvas for interactive music notes, sparkles, and petals -->
+        <canvas id="particles-canvas" class="particles-canvas"></canvas>
+
         <!-- Chibi Character Stage -->
         <div class="character-stage" id="character-stage">
+            <!-- Chibi Girl Layer -->
             <div class="chibi-container" id="chibi-container">
-                <img src="assets/chibi.png?v=3" alt="Chibi Singer" class="chibi-img">
-                
-                <!-- Floating musical note particles canvas -->
-                <canvas id="music-canvas" class="music-canvas"></canvas>
-
-                <!-- Subtle Microphone Icon SVG near hand -->
-                <div class="mic-icon-container">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" class="mic-icon">
-                        <rect x="9" y="2" width="6" height="11" rx="3" fill="#d5a6bd" />
+                <img src="assets/chibi.png" alt="Chibi Guitar Girl" class="chibi-image" id="chibi-girl">
+                <!-- Floating microphone -->
+                <div class="mic-stand">
+                    <svg viewBox="0 0 24 24" width="24" height="24" class="mic-icon">
+                        <rect x="9" y="2" width="6" height="10" rx="3" fill="#ffffff" stroke="#d5a6bd" stroke-width="1.5" />
                         <path d="M5 9c0 4 3.5 6 7 6s7-2 7-6" fill="none" stroke="#d5a6bd" stroke-width="1.5" stroke-linecap="round" />
                         <line x1="12" y1="15" x2="12" y2="21" stroke="#d5a6bd" stroke-width="1.5" stroke-linecap="round" />
                         <line x1="8" y1="21" x2="16" y2="21" stroke="#d5a6bd" stroke-width="1.5" stroke-linecap="round" />
@@ -71,20 +74,13 @@
             <!-- Visual Track Info -->
             <div class="track-info">
                 <div class="album-art-container">
-                    <img src="assets/chibi.png?v=3" alt="Track Art" class="album-art" id="player-art">
+                    <img src="assets/chibi.png" alt="Track Art" class="album-art" id="player-art">
                     <div class="music-glow-ring"></div>
                 </div>
                 <div class="track-details">
                     <h2 class="track-title" id="current-title">Nắng trên mây</h2>
                     <p class="track-artist" id="current-artist">Cloud Girl</p>
                 </div>
-
-                <button class="playlist-toggle-btn" id="playlist-toggle-btn" title="Danh sách phát">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-right: 6px;">
-                        <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v6l5-3z"/>
-                    </svg>
-                    <span>Danh sách phát</span>
-                </button>
             </div>
 
             <!-- Central Controls -->
@@ -131,7 +127,7 @@
                 </div>
             </div>
 
-            <!-- Right Controls: Volume -->
+            <!-- Right Controls: Volume & Playlist Toggle -->
             <div class="player-controls-right">
                 <div class="volume-container">
                     <button class="control-btn" id="volume-btn" title="Mute/Unmute">
@@ -143,11 +139,15 @@
                         <div class="volume-slider-fill" id="volume-slider-fill" style="width: 70%;"></div>
                     </div>
                 </div>
+
+                <button class="playlist-toggle-btn" id="playlist-toggle-btn" title="Danh sách phát">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-right: 6px;">
+                        <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v6l5-3z"/>
+                    </svg>
+                    <span>Danh sách phát</span>
+                </button>
             </div>
         </div>
-
-        <!-- Backdrop for closing playlist on mobile/click outside -->
-        <div class="playlist-backdrop" id="playlist-backdrop"></div>
 
         <!-- Slide-up Playlist Panel -->
         <div class="playlist-panel" id="playlist-panel">
@@ -164,6 +164,6 @@
     <!-- Background Audio Element -->
     <audio id="main-audio"></audio>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js"></script>
 </body>
 </html>
