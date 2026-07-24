@@ -398,6 +398,21 @@ progressBarBg.addEventListener("mousedown", (e) => {
     });
 });
 
+// Touch support for progress bar
+progressBarBg.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    seek(e.touches[0]);
+    window.addEventListener("touchmove", seekOnTouch, { passive: false });
+    window.addEventListener("touchend", () => {
+        window.removeEventListener("touchmove", seekOnTouch);
+    }, { once: true });
+}, { passive: false });
+
+function seekOnTouch(e) {
+    e.preventDefault();
+    seek(e.touches[0]);
+}
+
 function seekOnDrag(e) {
     seek(e);
 }
@@ -423,8 +438,31 @@ volumeSliderBg.addEventListener("mousedown", (e) => {
     });
 });
 
+// Touch support for volume slider
+volumeSliderBg.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    adjustVolume(e.touches[0]);
+    window.addEventListener("touchmove", adjustVolumeOnTouch, { passive: false });
+    window.addEventListener("touchend", () => {
+        window.removeEventListener("touchmove", adjustVolumeOnTouch);
+    }, { once: true });
+}, { passive: false });
+
+function adjustVolumeOnTouch(e) {
+    e.preventDefault();
+    adjustVolume(e.touches[0]);
+}
+
 function adjustVolumeOnDrag(e) {
     adjustVolume(e);
+}
+
+function adjustVolume(e) {
+    const rect = volumeSliderBg.getBoundingClientRect();
+    let percentage = (e.clientX - rect.left) / rect.width;
+    percentage = Math.max(0, Math.min(1, percentage));
+    audio.volume = percentage;
+    updateVolumeUI(percentage);
 }
 
 let lastVolume = 0.7;

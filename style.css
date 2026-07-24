@@ -968,41 +968,228 @@ body, html {
 
 
 /* ==========================================================================
-   Responsive Adaptation
+   Responsive Adaptation — Mobile First
    ========================================================================== */
 
+/* ── Tablet (≤ 850px) ─────────────────────────────────────────────────── */
 @media (max-width: 850px) {
+
+    /* Player: single column stack */
     .player-container {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        gap: 12px;
-        padding: 14px 20px;
+        grid-template-rows: auto auto auto;
+        gap: 10px;
+        padding: 14px 18px 12px;
         border-radius: 24px;
     }
 
-    .track-info {
-        justify-content: center;
-    }
-
-    .player-controls-right {
-        display: none; /* Hide volume/playlist toggle directly on mobile wrapper for size */
-    }
-
     .player-wrapper {
-        padding: 0 12px 14px 12px;
+        padding: 0 10px 12px 10px;
+    }
+
+    /* Track info centred */
+    .track-info {
+        justify-content: flex-start;
+    }
+
+    /* Right panel (volume + playlist button) stacked below controls */
+    .player-controls-right {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 10px;
+    }
+
+    /* Volume slider slightly wider on tablet */
+    .volume-slider-bg {
+        width: 80px;
+    }
+
+    /* Playlist panel spans more width */
+    .playlist-panel {
+        right: 10px;
+        left: 10px;
+        width: auto;
     }
 
     .character-stage {
-        transform: translate(-50%, 0) scale(0.7);
-        bottom: 25%;
-    }
-
-    .intro-title {
-        font-size: 2.0rem;
+        transform: translate(-50%, 0) scale(0.75);
+        bottom: 28%;
     }
 }
 
-@media (max-height: 600px) {
+/* ── Mobile (≤ 540px) ─────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+
+    .player-wrapper {
+        padding: 0 8px 10px 8px;
+    }
+
+    .player-container {
+        padding: 12px 14px 10px;
+        border-radius: 22px;
+        gap: 8px;
+    }
+
+    /* Album art + track name row */
+    .track-info {
+        gap: 10px;
+    }
+
+    .album-art-container {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        min-height: 42px;
+    }
+
+    .track-title {
+        font-size: 0.88rem;
+    }
+
+    .track-artist {
+        font-size: 0.73rem;
+    }
+
+    /* Controls row */
+    .controls-buttons {
+        gap: 10px;
+    }
+
+    .control-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .control-btn.play-btn {
+        width: 46px;
+        height: 46px;
+    }
+
+    /* Progress bar — larger touch target */
+    .progress-bar-bg {
+        height: 7px;
+        touch-action: none; /* prevent page scroll while dragging */
+    }
+
+    .progress-bar-bg:hover,
+    .progress-bar-bg:active {
+        height: 9px;
+    }
+
+    /* Always show handle on mobile (no hover state on touch) */
+    .progress-handle {
+        transform: translate(-50%, -50%) scale(1);
+        width: 14px;
+        height: 14px;
+    }
+
+    .time-label {
+        font-size: 0.7rem;
+        width: 34px;
+    }
+
+    /* Right controls: volume left, playlist button right */
+    .player-controls-right {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .volume-container {
+        flex: 1;
+        gap: 6px;
+    }
+
+    .volume-slider-bg {
+        flex: 1;
+        width: auto;
+        height: 5px;
+        touch-action: none;
+    }
+
+    /* Playlist toggle button — compact on mobile */
+    .playlist-toggle-btn {
+        padding: 7px 12px;
+        font-size: 0.72rem;
+        white-space: nowrap;
+    }
+
+    /* Playlist panel full-width, anchored to bottom of player */
+    .playlist-panel {
+        right: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        bottom: calc(100% + 8px);
+        max-height: 50vh;
+    }
+
+    .song-list {
+        max-height: calc(50vh - 56px);
+    }
+
+    /* Character: smaller and higher so player doesn't cover it */
+    .character-stage {
+        transform: translate(-50%, 0) scale(0.58);
+        bottom: 30%;
+    }
+
+    /* Lyric bubbles — slightly smaller font on tiny screens */
+    .lyric-bubble {
+        font-size: 0.92rem;
+    }
+
+    /* Intro start button */
+    .start-btn {
+        padding: 14px 32px;
+        font-size: 1rem;
+    }
+
+    .start-tagline {
+        font-size: 1.3rem;
+        letter-spacing: 3px;
+    }
+}
+
+/* ── Very small screens (≤ 380px) ────────────────────────────────────── */
+@media (max-width: 380px) {
+    .controls-buttons {
+        gap: 6px;
+    }
+
+    .control-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .control-btn.play-btn {
+        width: 42px;
+        height: 42px;
+    }
+
+    .character-stage {
+        transform: translate(-50%, 0) scale(0.48);
+        bottom: 28%;
+    }
+}
+
+/* ── Landscape phone (short height) ──────────────────────────────────── */
+@media (max-height: 500px) {
+    .character-stage {
+        transform: translate(-50%, 0) scale(0.45);
+        bottom: 10%;
+    }
+
+    .player-wrapper {
+        padding-bottom: 6px;
+    }
+}
+
+@media (max-height: 600px) and (min-width: 541px) {
     .character-stage {
         transform: translate(-50%, 0) scale(0.6);
         bottom: 15%;
