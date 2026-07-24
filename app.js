@@ -853,32 +853,46 @@ function endVideoWithFade() {
     
     // Step 2: Đợi màn hình tối ĐEN HOÀN TOÀN (800ms) mới xử lý phần bên dưới
     setTimeout(() => {
-        // Tạm dừng và ẨN HOÀN TOÀN video ngay lúc màn hình đang đen xì (Tránh bị nháy khung hình cuối video)
-        introVideo.pause();
-        introVideo.style.display = "none";
-        startScreen.style.display = "none";
-        
-        // Kích hoạt giao diện chính (Mây & Nhân vật) phía sau
-        mainScene.classList.add("active");
-        canvasActive = true;
-        
-        // Sáng dần lên: Màn đen mờ đi từ từ để lộ ra giao diện chính bên dưới
-        fadeBlack.classList.remove("active");
-        
-        // Fade nhạc background từ từ vào
-        fadeInAudio(0.7, 1800);
-        
-        // Step 3: Sau khi màn đen mờ hẳn và hiện trọn vẹn giao diện chính (800ms sau)
-        setTimeout(() => {
-            // Hiện khung trình phát nhạc bên dưới
-            playerWrapper.classList.add("active");
-            
-            // Dọn dẹp hoàn toàn lớp phủ Intro để giải phóng bộ nhớ
-            introOverlay.style.display = "none";
-            introVideo.src = "";
-            introVideo.load();
-        }, 800);
-        
+        try {
+            // Tạm dừng và ẨN HOÀN TOÀN video ngay lúc màn hình đang đen xì (Tránh bị nháy khung hình cuối video)
+            introVideo.pause();
+            introVideo.style.display = "none";
+            startScreen.style.display = "none";
+
+            // Kích hoạt giao diện chính (Mây & Nhân vật) phía sau
+            mainScene.classList.add("active");
+            canvasActive = true;
+
+            // Gỡ nền trắng đục của lớp intro-overlay ngay lúc này,
+            // nếu không main-scene sẽ bị che khuất bởi nền trắng của overlay
+            // trong suốt khoảng thời gian chờ display:none (dẫn tới màn hình đen/trắng bị kẹt)
+            introOverlay.style.backgroundColor = "transparent";
+
+            // Sáng dần lên: Màn đen mờ đi từ từ để lộ ra giao diện chính bên dưới
+            fadeBlack.classList.remove("active");
+
+            // Fade nhạc background từ từ vào
+            fadeInAudio(0.7, 1800);
+        } catch (err) {
+            console.error("Lỗi khi chuyển cảnh sau intro:", err);
+        } finally {
+            // Step 3: Sau khi màn đen mờ hẳn và hiện trọn vẹn giao diện chính (800ms sau)
+            // Đặt trong finally để CHẮC CHẮN overlay luôn được dọn dẹp,
+            // kể cả khi có lỗi ở khối try phía trên (tránh kẹt màn hình vĩnh viễn)
+            setTimeout(() => {
+                try {
+                    // Hiện khung trình phát nhạc bên dưới
+                    playerWrapper.classList.add("active");
+                } catch (err) {
+                    console.error("Lỗi khi hiện player:", err);
+                } finally {
+                    // Dọn dẹp hoàn toàn lớp phủ Intro để giải phóng bộ nhớ
+                    introOverlay.style.display = "none";
+                    introVideo.src = "";
+                    introVideo.load();
+                }
+            }, 800);
+        }
     }, 800);
 }
 
