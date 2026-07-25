@@ -548,7 +548,7 @@ body, html {
     border-radius: 30px;
     padding: 16px 28px;
     display: grid;
-    grid-template-columns: 240px 1fr 200px;
+    grid-template-columns: 240px 1fr minmax(260px, auto);
     align-items: center;
     gap: 20px;
     box-shadow: 0 10px 40px rgba(135, 165, 210, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
@@ -785,12 +785,14 @@ body, html {
     align-items: center;
     justify-content: flex-end;
     gap: 16px;
+    flex-wrap: nowrap;
 }
 
 .volume-container {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
 }
 
 .volume-slider-bg {
@@ -800,6 +802,7 @@ body, html {
     border-radius: 10px;
     cursor: pointer;
     position: relative;
+    flex-shrink: 0;
 }
 
 .volume-slider-fill {
@@ -974,11 +977,16 @@ body, html {
 /* ── Tablet (≤ 850px) ─────────────────────────────────────────────────── */
 @media (max-width: 850px) {
 
-    /* Player: single column stack */
+    /* Single grid: track-info + playlist button share the top row,
+       controls+progress take the full row below */
     .player-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "info playlist"
+            "controls controls";
+        gap: 10px 12px;
         padding: 14px 18px 12px;
         border-radius: 24px;
     }
@@ -989,21 +997,43 @@ body, html {
 
     /* Track info centred */
     .track-info {
+        grid-area: info;
         justify-content: flex-start;
+        min-width: 0;
     }
 
-    /* Right panel (volume + playlist button) stacked below controls */
+    .player-controls-center {
+        grid-area: controls;
+    }
+
+    /* Volume bar removed on mobile — use the phone's hardware volume keys */
+    .volume-container {
+        display: none;
+    }
+
+    /* Playlist button now sits beside the track title, icon-only */
     .player-controls-right {
+        grid-area: playlist;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        gap: 10px;
+        justify-content: flex-end;
     }
 
-    /* Volume slider slightly wider on tablet */
-    .volume-slider-bg {
-        width: 80px;
+    .playlist-toggle-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .playlist-toggle-btn svg {
+        margin-right: 0 !important;
+    }
+
+    .playlist-toggle-btn span {
+        display: none;
     }
 
     /* Playlist panel spans more width */
@@ -1090,32 +1120,14 @@ body, html {
         width: 34px;
     }
 
-    /* Right controls: volume left, playlist button right */
+    /* Right controls: playlist button only (volume already hidden) */
     .player-controls-right {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        gap: 8px;
+        justify-content: flex-end;
     }
 
-    .volume-container {
-        flex: 1;
-        gap: 6px;
-    }
-
-    .volume-slider-bg {
-        flex: 1;
-        width: auto;
-        height: 5px;
-        touch-action: none;
-    }
-
-    /* Playlist toggle button — compact on mobile */
     .playlist-toggle-btn {
-        padding: 7px 12px;
-        font-size: 0.72rem;
-        white-space: nowrap;
+        width: 36px;
+        height: 36px;
     }
 
     /* Playlist panel full-width, anchored to bottom of player */

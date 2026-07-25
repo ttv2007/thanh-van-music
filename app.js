@@ -262,6 +262,11 @@ let audioUnlocked = false;
 let isShuffle = false;
 let repeatMode = 'all'; // 'off' | 'all' | 'one'
 
+// On mobile the in-app volume slider is hidden (users rely on the phone's
+// hardware volume keys instead), so default to full volume there.
+const isMobileLayout = window.matchMedia("(max-width: 850px)").matches;
+const defaultVolume = isMobileLayout ? 1.0 : 0.7;
+
 // DOM Elements
 const audio = document.getElementById("main-audio");
 const playBtn = document.getElementById("play-btn");
@@ -307,9 +312,9 @@ function init() {
     // 2. Generate Playlist UI
     buildPlaylistUI();
 
-    // 3. Set initial volume (70%)
-    audio.volume = 0.7;
-    updateVolumeUI(0.7);
+    // 3. Set initial volume
+    audio.volume = defaultVolume;
+    updateVolumeUI(defaultVolume);
 
     // 4. Set initial repeat state (loop all is active by default)
     if (repeatBtn) {
@@ -393,10 +398,13 @@ audio.addEventListener("ended", () => {
 progressBarBg.addEventListener("mousedown", (e) => {
     seek(e);
     window.addEventListener("mousemove", seekOnDrag);
-    window.addEventListener("mouseup", () => {
-        window.removeEventListener("mousemove", seekOnDrag);
-    });
+    window.addEventListener("mouseup", stopSeekDrag);
 });
+
+function stopSeekDrag() {
+    window.removeEventListener("mousemove", seekOnDrag);
+    window.removeEventListener("mouseup", stopSeekDrag);
+}
 
 // Touch support for progress bar
 progressBarBg.addEventListener("touchstart", (e) => {
@@ -433,10 +441,13 @@ function seek(e) {
 volumeSliderBg.addEventListener("mousedown", (e) => {
     adjustVolume(e);
     window.addEventListener("mousemove", adjustVolumeOnDrag);
-    window.addEventListener("mouseup", () => {
-        window.removeEventListener("mousemove", adjustVolumeOnDrag);
-    });
+    window.addEventListener("mouseup", stopVolumeDrag);
 });
+
+function stopVolumeDrag() {
+    window.removeEventListener("mousemove", adjustVolumeOnDrag);
+    window.removeEventListener("mouseup", stopVolumeDrag);
+}
 
 // Touch support for volume slider
 volumeSliderBg.addEventListener("touchstart", (e) => {
@@ -465,7 +476,7 @@ function adjustVolume(e) {
     updateVolumeUI(percentage);
 }
 
-let lastVolume = 0.7;
+let lastVolume = defaultVolume;
 volumeBtn.addEventListener("click", () => {
     if (audio.volume > 0) {
         lastVolume = audio.volume;
@@ -910,7 +921,7 @@ function endVideoWithFade() {
             fadeBlack.classList.remove("active");
 
             // Fade nhạc background từ từ vào
-            fadeInAudio(0.7, 1800);
+            fadeInAudio(defaultVolume, 1800);
         } catch (err) {
             console.error("Lỗi khi chuyển cảnh sau intro:", err);
         } finally {
